@@ -1,0 +1,32 @@
+name: GothicJobs
+main: com.loncha.gothicjobs.Main
+version: 0.1
+commands:
+   profesiones:
+      description: Abre la interfaz de profesiones.
+      usage: /profesiones
+   levearprofesiones:
+      description: test.
+      usage: /levearprofesiones
+   reloadjobs:
+      description: Recarga el archivo de configuracion de las profesiones;
+      usage: /reloadjobs
+permissions:
+   gjobs.herrero0:
+      description: Permisos de herreria de nivel 0.
+      default: op
+   gjobs.herrero1:
+      description: Permisos de herreria de nivel 1.
+      default: op
+   gjobs.herrero2:
+      description: Permisos de herreria de nivel 2.
+      default: op
+   gjobs.herrero3:
+      description: Permisos de herreria de nivel 3.
+      default: op
+   gjobs.herrero4:
+      description: Permisos de herreria de nivel 4.
+      default: op
+   gjobs.herrero5:
+      description: Permisos de herreria de nivel 5.
+      default: op
