@@ -11,7 +11,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -19,10 +21,15 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Recipe;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.yaml.snakeyaml.Yaml;
+
+import net.md_5.bungee.api.ChatColor;
 
 public class Main extends JavaPlugin implements Listener{
 	Profesiones profesiones = new Profesiones(this);
@@ -81,6 +88,25 @@ public class Main extends JavaPlugin implements Listener{
 	}
 	
 	@EventHandler
+	public void onBlockIgnite(BlockIgniteEvent e) {
+		Block b = e.getBlock();
+		Location lDown = new Location(b.getWorld(), b.getLocation().getX(), b.getLocation().getY()-1, b.getLocation().getZ());
+		if (lDown.getBlock().getType() == Material.COAL_BLOCK) {
+            BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+            scheduler.scheduleSyncDelayedTask(this, new Runnable() {
+                @Override
+                public void run() {
+                	if (b.getType() == Material.FIRE) {
+                		b.setType(Material.AIR);
+                		lDown.getBlock().setType(Material.AIR);
+                	}
+                }
+
+            }, 2400);
+		}
+	}
+	
+	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) throws IOException, InvalidConfigurationException {
 		Player p = e.getPlayer();
 		
@@ -110,7 +136,7 @@ public class Main extends JavaPlugin implements Listener{
 		
 		for(String s : profesiones.profesiones) {
 			if (!p.hasPermission("gjobs."+s+"0")) {
-				getServer().dispatchCommand(getServer().getConsoleSender(), "upc addPlayerPermission " + p.getName() + " gjobs." + s + 0);
+				getServer().dispatchCommand(getServer().getConsoleSender(), "upc addGroup " + p.getName() + " gjobs." + s + 0);
 			}
 		}
 		

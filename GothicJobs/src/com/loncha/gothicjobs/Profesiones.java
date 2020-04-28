@@ -86,7 +86,7 @@ public class Profesiones implements Listener, Plugin{
 				if (puntos >= m.puntosDeCorte[k]) {
 					niveles[i] = k+1;
 					if (!p.hasPermission("gjobs."+profesiones[i]+niveles[i])) {
-						m.getServer().dispatchCommand(m.getServer().getConsoleSender(), "upc addPlayerPermission " + p.getName() + " gjobs." + profesiones[i] + niveles[i]);
+						m.getServer().dispatchCommand(m.getServer().getConsoleSender(), "upc addGroup " + p.getName() + " gjobs." + profesiones[i] + niveles[i]);
 					}
 				}
 			}
@@ -184,6 +184,7 @@ public class Profesiones implements Listener, Plugin{
 	@EventHandler
 	public void onItemCraft(CraftItemEvent e) throws InvalidConfigurationException {
 		Player p = (Player) e.getWhoClicked();
+
 		ItemStack item = e.getInventory().getResult();
 		ItemStack itemInHand = p.getInventory().getItemInMainHand();
 		
@@ -208,39 +209,81 @@ public class Profesiones implements Listener, Plugin{
 			
 			for (int k = 0; k < tempProfesion.size(); k++) {
 				for (String s : tempProfesion.get(k)) {
-					if (s.contains(",")) {
-						String[] palabra = s.split(",");
-
-						if (palabra.length < 3) {
-							if (palabra[0].equalsIgnoreCase(nombreItem)) {
-								if (palabra[1].equalsIgnoreCase(nombreItemInHand)) {
-									subirNivelProfesion(p, i, k, 0);
-									break;
-									
-								} else if (isNumeric(palabra[1])){
-									double puntosCrafteo = Double.parseDouble(palabra[1]);
-									subirNivelProfesion(p, i, k, puntosCrafteo);
-									break;
-									
+					if (e.getCursor() != null && e.getCursor().getType() != Material.AIR && e.getCursor().hasItemMeta()) {
+						if (e.getCursor().getItemMeta().getDisplayName().equals(e.getCurrentItem().getItemMeta().getDisplayName())) {
+							if (e.getCursor().getAmount() < e.getCurrentItem().getMaxStackSize()) {
+								if (s.contains(",")) {
+									String[] palabra = s.split(",");
+			
+									if (palabra.length < 3) {
+										if (palabra[0].equalsIgnoreCase(nombreItem)) {
+											if (palabra[1].equalsIgnoreCase(nombreItemInHand)) {
+												subirNivelProfesion(p, i, k, 0);
+												break;
+												
+											} else if (isNumeric(palabra[1])){
+												double puntosCrafteo = Double.parseDouble(palabra[1]);
+												subirNivelProfesion(p, i, k, puntosCrafteo);
+												break;
+												
+											} else {
+												e.setCancelled(true);
+											}
+										}
+									} else {
+										if (palabra[0].equalsIgnoreCase(nombreItem)) {
+											if (palabra[1].equalsIgnoreCase(nombreItemInHand)) {
+												if (isNumeric(palabra[2])) {
+													double puntosCrafteo = Double.parseDouble(palabra[2]);
+													subirNivelProfesion(p, i, k, puntosCrafteo);
+													break;
+												}
+											}
+										}
+									}
 								} else {
-									e.setCancelled(true);
-								}
-							}
-						} else {
-							if (palabra[0].equalsIgnoreCase(nombreItem)) {
-								if (palabra[1].equalsIgnoreCase(nombreItemInHand)) {
-									if (isNumeric(palabra[2])) {
-										double puntosCrafteo = Double.parseDouble(palabra[2]);
-										subirNivelProfesion(p, i, k, puntosCrafteo);
+									if (s.equals(nombreItem)) {
+										subirNivelProfesion(p, i, k, 0);
 										break;
 									}
 								}
 							}
 						}
 					} else {
-						if (s.equals(nombreItem)) {
-							subirNivelProfesion(p, i, k, 0);
-							break;
+						if (s.contains(",")) {
+							String[] palabra = s.split(",");
+	
+							if (palabra.length < 3) {
+								if (palabra[0].equalsIgnoreCase(nombreItem)) {
+									if (palabra[1].equalsIgnoreCase(nombreItemInHand)) {
+										subirNivelProfesion(p, i, k, 0);
+										break;
+										
+									} else if (isNumeric(palabra[1])){
+										double puntosCrafteo = Double.parseDouble(palabra[1]);
+										subirNivelProfesion(p, i, k, puntosCrafteo);
+										break;
+										
+									} else {
+										e.setCancelled(true);
+									}
+								}
+							} else {
+								if (palabra[0].equalsIgnoreCase(nombreItem)) {
+									if (palabra[1].equalsIgnoreCase(nombreItemInHand)) {
+										if (isNumeric(palabra[2])) {
+											double puntosCrafteo = Double.parseDouble(palabra[2]);
+											subirNivelProfesion(p, i, k, puntosCrafteo);
+											break;
+										}
+									}
+								}
+							}
+						} else {
+							if (s.equals(nombreItem)) {
+								subirNivelProfesion(p, i, k, 0);
+								break;
+							}
 						}
 					}
 				}
@@ -493,7 +536,6 @@ public class Profesiones implements Listener, Plugin{
 			}
 		} else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
 			if (b.hasMetadata("left")) {
-				System.out.println("Entra1");
 				e.setCancelled(true);
 				for (int i = 0 ; i < listaProfesiones.size(); i++) {
 					ArrayList<ArrayList<String>> tempProfesion = listaProfesiones.get(i);
@@ -504,10 +546,11 @@ public class Profesiones implements Listener, Plugin{
 								String[] palabra = s.split(",");
 								//Si el bloque tiene el metadato guardado en la lista
 								if (b.hasMetadata(palabra[0])) {
-									System.out.println("tiene"+palabra[0]);
+									System.out.println("profesion1");
 									b.removeMetadata(palabra[0], m);
 									
 									if (palabra.length < 3) {
+										System.out.println("2");
 										if (isNumeric(palabra[1])) {
 											Double puntosCrafteo = Double.parseDouble(palabra[1]);
 											subirNivelProfesion(p, i, k, puntosCrafteo);
@@ -522,10 +565,12 @@ public class Profesiones implements Listener, Plugin{
 											}
 										}
 									} else {
+										System.out.println("3");
 										if (palabra[1].equalsIgnoreCase(nombreItemInHand)) {
+											System.out.println("herramienta");
 											if (isNumeric(palabra[2])) {
+												System.out.println("puntos");
 												double puntosCrafteo = Double.parseDouble(palabra[2]);
-												System.out.println("entraprof1");
 												subirNivelProfesion(p, i, k, puntosCrafteo);
 												break;
 											}
@@ -537,7 +582,6 @@ public class Profesiones implements Listener, Plugin{
 								} else if (b.getType().toString().equalsIgnoreCase(palabra[0])){
 									if (palabra.length < 3) {
 										if (isNumeric(palabra[1])) {
-											System.out.println("entraprof2");
 											Double puntosCrafteo = Double.parseDouble(palabra[1]);
 											subirNivelProfesion(p, i, k, puntosCrafteo);
 											break;
@@ -596,7 +640,7 @@ public class Profesiones implements Listener, Plugin{
 			} else {
 				entityName = e.getEntity().getName();
 			}
-			
+
 			//Si has matado a un mob
 			if (e.getEntity() instanceof LivingEntity) {
 				if (!(e.getEntity() instanceof Player)) {

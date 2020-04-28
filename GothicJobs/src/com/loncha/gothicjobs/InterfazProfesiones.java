@@ -22,8 +22,8 @@ public class InterfazProfesiones implements Listener {
 	Material[] iconosProfesiones = {Material.ANVIL, Material.BOW, Material.IRON_PICKAXE, Material.IRON_HOE, Material.BEETROOT_SOUP, Material.POTION};
 	String[] nombreProfesiones = {"Rama de herrero", "Rama de cazador", "Rama de constructor", "Rama de granjero", "Rama de tabernero", "Rama de alquimista"};
 	String[] descripcionProfesiones = {"Crafteos de herrero", "Crafteos de cazador", "Crafteos de constructor", "Crafteos de granjero", "Crafteos de tabernero", "Crafteos de alquimista"};
-	
-	public InterfazProfesiones(Main m, Profesiones profesiones) {
+	String[] puntosDeCorte = {"0 puntos necesarios","200 puntos necesarios","600 puntos necesarios","1400 puntos necesarios","3000 puntos necesarios","6300 puntos necesarios"};
+ 	public InterfazProfesiones(Main m, Profesiones profesiones) {
 		this.m = m;
 		this.profesiones = profesiones;
 	}
@@ -51,7 +51,7 @@ public class InterfazProfesiones implements Listener {
 		}
 		
 		for (int i = 0; i < iconosProfesiones.length; i++) {
-			createDisplay(iconosProfesiones[i], invProfesiones, posicionIcono, nombreProfesiones[i], descripcionProfesiones[i]);
+			createDisplay(iconosProfesiones[i], invProfesiones, posicionIcono, nombreProfesiones[i], new String[] {descripcionProfesiones[i]});
 			posicionIcono += 9;
 		}
 		
@@ -67,22 +67,22 @@ public class InterfazProfesiones implements Listener {
 			int nivelProfesion = nivelesProfesiones[i];
 
 			//Niveles
-			for (int k = 1; k <= 5; k++) {
+			for (int k = 0; k <= 5; k++) {
 				posicionIcono++;
 				
 				if (k <= nivelProfesion) {
-					createDisplay(Material.EMERALD_BLOCK, invProfesiones, posicionIcono, "Nivel " + k , "");
+					createDisplay(Material.EMERALD_BLOCK, invProfesiones, posicionIcono, "Nivel " + k , new String[] {puntosDeCorte[k], ChatColor.GOLD+"Click para más información..."});
 				} else {
-					createDisplay(Material.REDSTONE_BLOCK, invProfesiones, posicionIcono, "Nivel " + k , "");
+					createDisplay(Material.REDSTONE_BLOCK, invProfesiones, posicionIcono, "Nivel " + k , new String[] {puntosDeCorte[k], ChatColor.GOLD+"Click para más información..."});
 				}
 				
 			}
 			
-			posicionIcono += 4;
+			posicionIcono += 3;
 		}
 		
 		//Icono de puntos restantes
-		createDisplay(Material.BOOK, invProfesiones, 8, "Puntos de profesión restantes: " + m.getPuntosProfesionRestantes(p), "Estos son los puntos que te quedan para gastar en las diferentes profesiones");
+		createDisplay(Material.BOOK, invProfesiones, 8, "Puntos de profesión restantes: " + m.getPuntosProfesionRestantes(p), new String[] {"Estos son los puntos que te quedan para gastar en las diferentes profesiones"});
 		
 		//Abre el inventario de profesiones
 		p.openInventory(invProfesiones);
@@ -99,17 +99,12 @@ public class InterfazProfesiones implements Listener {
 			Material clickedItem = e.getCurrentItem().getType();
 			
 			if (inv.getTitle().equalsIgnoreCase("Profesiones")) {
-				e.setCancelled(true);
 				
 				for (int i = 0; i < iconosProfesiones.length; i++) {
 					if (clickedItem == iconosProfesiones[i]) {
 						Boolean[] profesionesLockeadas = m.getProfesionesLockeadas(p);
 						
 						profesionesLockeadas[i] = !profesionesLockeadas[i];
-						
-						for (Boolean b : profesionesLockeadas) {
-							System.out.println(b);
-						}
 						
 						m.profesionesLockeadas.put(p, profesionesLockeadas);
 						System.out.println("La profesión: " + nombreProfesiones[i] + " está en modo: " + profesionesLockeadas[i]);
@@ -130,12 +125,14 @@ public class InterfazProfesiones implements Listener {
 		}
 	}
 	
-	public static void createDisplay(Material material, Inventory inv, int Slot, String name, String lore) {
+	public static void createDisplay(Material material, Inventory inv, int Slot, String name, String[] lore) {
 		ItemStack item = new ItemStack(material);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(name);
 		ArrayList<String> Lore = new ArrayList<String>();
-		Lore.add(lore);
+		for (String s : lore) {
+			Lore.add(s);
+		}
 		meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 		meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 		meta.setLore(Lore);
