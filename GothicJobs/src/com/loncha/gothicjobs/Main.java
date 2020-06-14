@@ -23,7 +23,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -39,6 +42,8 @@ public class Main extends JavaPlugin implements Listener{
 	HashMap<Player,Boolean[]> profesionesLockeadas = new HashMap<Player,Boolean[]>();
 	HashMap<Player,Double[]> puntosProfesiones = new HashMap<Player,Double[]>();
 	
+	static List<ObjetoProfesion> listaInterfacesProfesiones = new ArrayList<ObjetoProfesion>();
+	
 	FileConfiguration configFile;
 	FileConfiguration playerYaml;
 	
@@ -47,7 +52,6 @@ public class Main extends JavaPlugin implements Listener{
 	public static int[] puntosDeCorte = {100, 200, 300, 400, 500};
 	public static int puntosPorCrafteo = 10;
 	
-
 	//EL ORDEN DE LAS PROFESIONES EN LOS ARRAYS DE LOCKEADOS Y PUNTOSPROFESION DEBE SER EL SIGUIENTE:
 	//Herrero - Cazador - Constructor - Granjero - Tabernero - Alquimista
 	//El orden debe estar presente en el archivo del que se lea la información (yml)
@@ -78,6 +82,7 @@ public class Main extends JavaPlugin implements Listener{
 		}
 		
 		cargarConfigInicial();
+		cargarDatosInterfaces();
 		
 		try {
 			profesiones.rellenarListas();
@@ -172,6 +177,54 @@ public class Main extends JavaPlugin implements Listener{
 		}
 	}
 	
+	public void cargarDatosInterfaces() {
+		try {
+			File interfacesProfesiones = new File("plugins/GothicJobs/configinterfaz.yml");
+			configFile = new YamlConfiguration();
+			configFile.load(interfacesProfesiones);
+
+			String[] profesiones = Profesiones.profesiones;
+			
+			for (int i = 0; i < profesiones.length; i++) {
+				for (int k = 0; k < 6; k++) {
+					List<String> tempProfLine = getCustomConfig().getStringList(profesiones[i]+".nivel "+k);
+					List<ItemStack> tempObjects = new ArrayList<ItemStack>();
+					List<ItemStack> tempMecanicas = new ArrayList<ItemStack>();
+					
+					ObjetoProfesion objProf = new ObjetoProfesion();
+					
+					objProf.setNombreProfesion("§f"+profesiones[i]);
+					objProf.setNivelProfesion(k);
+					
+					for (String s : tempProfLine) {
+						String[] splitter = s.split("/");
+						ItemStack itemProf = new ItemStack(Material.valueOf(splitter[2]), 1, (short) Integer.parseInt(splitter[3]));
+						
+						ItemMeta metaProf = itemProf.getItemMeta();		
+						metaProf.setDisplayName("§f"+splitter[0]);
+						metaProf.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+						metaProf.setLore(new ArrayList<String>(Arrays.asList(splitter[1])));
+						itemProf.setItemMeta(metaProf);
+						
+						if (splitter[4].equalsIgnoreCase("M")) {
+							tempMecanicas.add(itemProf);
+						} else if (splitter[4].equalsIgnoreCase("O")) {
+							tempObjects.add(itemProf);
+						}
+						
+					}
+
+					objProf.setMecanicasProfesion(tempMecanicas);
+					objProf.setObjetosProfesion(tempObjects);
+					
+					listaInterfacesProfesiones.add(objProf);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	//Método para cargar los datos de un .yml en el hashmap correspondiente
 	public boolean cargarDatos(Player p) {
 		try {
@@ -194,10 +247,6 @@ public class Main extends JavaPlugin implements Listener{
 			for (int i = 0; i < tempArrayLock.length; i++) {
 				tempArrayLock[i] = tempLock.get(i);
 				tempArrayPuntos[i] = tempPuntosProfesion.get(i);
-			}
-			
-			for (Boolean b : tempArrayLock) {
-				//System.out.println(b);
 			}
 
 			puntosProfesionRestantes.put(p,tempRestantes);

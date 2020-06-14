@@ -1,6 +1,7 @@
 package com.loncha.gothicjobs;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,14 +21,19 @@ public class InterfazProfesiones implements Listener {
 	
 	//Array de iconos para el menú de profesiones
 	Material[] iconosProfesiones = {Material.ANVIL, Material.BOW, Material.IRON_PICKAXE, Material.IRON_HOE, Material.BEETROOT_SOUP, Material.POTION};
+	
+	//Array con el nombre y descripción de las profesiones en la interfaz.
 	String[] nombreProfesiones = {"Rama de herrero", "Rama de cazador", "Rama de constructor", "Rama de granjero", "Rama de tabernero", "Rama de alquimista"};
 	String[] descripcionProfesiones = {"Crafteos de herrero", "Crafteos de cazador", "Crafteos de constructor", "Crafteos de granjero", "Crafteos de tabernero", "Crafteos de alquimista"};
 	String[] puntosDeCorte = {"0 puntos necesarios","200 puntos necesarios","600 puntos necesarios","1400 puntos necesarios","3000 puntos necesarios","6300 puntos necesarios"};
+	
+	//Constructor
  	public InterfazProfesiones(Main m, Profesiones profesiones) {
 		this.m = m;
 		this.profesiones = profesiones;
 	}
 	
+ 	//Método encargado de listar las profesiones en la interfaz correspondiente (Las lista con las que tienes desbloqueadas, los puntos, etc.)
 	public void mostrarProfesiones(Player p) {
 		m.cargarDatos(p);
 		
@@ -89,42 +95,177 @@ public class InterfazProfesiones implements Listener {
 		
 	}
 	
+	public void mostrarCrafteosProfesiones(Player p, String profesion, String nivel) {
+		Inventory invProfesiones = Bukkit.createInventory(p, 9, "Información profesiones");
+		
+		for (int i = 0; i < 9; i++) {
+			createDisplay(Material.STAINED_GLASS_PANE, invProfesiones, i," ", new String[] {});
+		}
+		
+		Material mProf = Material.BOOK;
+		for (int i = 0; i < nombreProfesiones.length; i++) {
+			if (nombreProfesiones[i].contains(profesion.toLowerCase())) {
+				mProf = iconosProfesiones[i];
+			}
+		}
+		
+		createDisplay(mProf, invProfesiones, 0,"§f"+profesion + " " + nivel, new String[] {});
+		createDisplay(Material.BOOK, invProfesiones, 3, "§fObjetos desbloqueados", new String[] {"Lista de objetos que desbloqueas al " + nivel.toLowerCase() + " de " + profesion.toLowerCase()});
+		createDisplay(Material.ANVIL, invProfesiones, 5, "§fMecánicas desbloqueadas", new String[] {"Lista de mecánicas que desbloqueas al " + nivel.toLowerCase() + " de " + profesion.toLowerCase()});
+		createDisplay(Material.REDSTONE, invProfesiones, 8, "§fVolver atras", new String[] {});
+		
+		p.openInventory(invProfesiones);
+	}
+	
+	public void mostrarObjProfesiones(Player p, String profesion, int nivel, String tipo) {
+		ObjetoProfesion objProf = new ObjetoProfesion();
+
+		for (ObjetoProfesion temp : Main.listaInterfacesProfesiones) {
+			if (temp.getNombreProfesion().equalsIgnoreCase(profesion)) {
+				if (temp.getNivelProfesion() == nivel) {
+					objProf = temp;
+					break;
+				}
+			}
+		}
+		
+		List<ItemStack> itemsProf = new ArrayList<ItemStack>();
+		
+		if (tipo.equalsIgnoreCase("objetos")) {
+			itemsProf = objProf.getObjetosProfesion();
+			
+			
+		} else if (tipo.equalsIgnoreCase("mecanicas")) {
+			itemsProf = objProf.getMecanicasProfesion();
+			
+		}
+		
+		int sizeInterface = 9;
+		
+		if (itemsProf.size() >= 10 && itemsProf.size() < 18) {
+			sizeInterface = 18;
+		} else if (itemsProf.size() >= 18 && itemsProf.size() < 27) {
+			sizeInterface = 27;
+		} else if (itemsProf.size() >= 27 && itemsProf.size() < 36) {
+			sizeInterface = 36;
+		} else if (itemsProf.size() >= 36 && itemsProf.size() < 45) {
+			sizeInterface = 45;
+		} else if (itemsProf.size() >= 45 && itemsProf.size() < 54) {
+			sizeInterface = 54;
+		}
+		
+		Inventory invProfesiones = Bukkit.createInventory(p, sizeInterface, "Desbloqueables");
+
+		for (int i = 0; i < itemsProf.size(); i++) {
+			invProfesiones.setItem(i, itemsProf.get(i));
+		}
+		
+		createDisplay(Material.REDSTONE, invProfesiones, invProfesiones.getSize()-1, "§fVolver atras", new String[] {});
+		
+		p.openInventory(invProfesiones);
+	}
+	
+	//Evento de click en un inventario
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
 		Player p = (Player) e.getWhoClicked();
 		
 		Inventory inv = e.getInventory();
+		if (e.getClick().isLeftClick()) {
+			if (e.getCurrentItem() != null) {		
+				if (inv.getTitle().equalsIgnoreCase("Profesiones")) {
+					e.setCancelled(true);
+					Material clickedItem = e.getCurrentItem().getType();
+					
+					//DETECTAR CLICK EN LAS PROFESIONES PARA BLOQUEARLAS
+					for (int i = 0; i < iconosProfesiones.length; i++) {
+						if (clickedItem == iconosProfesiones[i]) {
+							Boolean[] profesionesLockeadas = m.getProfesionesLockeadas(p);
+							
+							profesionesLockeadas[i] = !profesionesLockeadas[i];
+							
+							m.profesionesLockeadas.put(p, profesionesLockeadas);
+							System.out.println("La profesión: " + nombreProfesiones[i] + " está en modo: " + profesionesLockeadas[i]);
 		
-		if (e.getCurrentItem() != null) {
-			Material clickedItem = e.getCurrentItem().getType();
-			
-			if (inv.getTitle().equalsIgnoreCase("Profesiones")) {
-				
-				for (int i = 0; i < iconosProfesiones.length; i++) {
-					if (clickedItem == iconosProfesiones[i]) {
-						Boolean[] profesionesLockeadas = m.getProfesionesLockeadas(p);
-						
-						profesionesLockeadas[i] = !profesionesLockeadas[i];
-						
-						m.profesionesLockeadas.put(p, profesionesLockeadas);
-						System.out.println("La profesión: " + nombreProfesiones[i] + " está en modo: " + profesionesLockeadas[i]);
-	
-	
-						
-						try {
-							m.actualizarDatos(p);
+							try {
+								m.actualizarDatos(p);
+								mostrarProfesiones(p);
+								
+							} catch(Exception ex) {
+								ex.printStackTrace();
+							}
+						}
+					}
+					
+					//DETECTAR CLICK EN LOS NIVELES
+					ItemStack fullClickedItem = e.getCurrentItem();
+					
+					if (fullClickedItem.hasItemMeta()) {
+						//HERRERO
+						if (e.getSlot() > 0 && e.getSlot() < 8) {
+							mostrarCrafteosProfesiones(p, "Herrero", fullClickedItem.getItemMeta().getDisplayName());
+						} 
+						//CAZADOR
+						else if (e.getSlot() > 9 && e.getSlot() < 17) {
+							mostrarCrafteosProfesiones(p, "Cazador", fullClickedItem.getItemMeta().getDisplayName());
+						}
+						//CONSTRUCTOR
+						else if (e.getSlot() > 18 && e.getSlot() < 26) {
+							mostrarCrafteosProfesiones(p, "Constructor", fullClickedItem.getItemMeta().getDisplayName());
+						}
+						//GRANJERO
+						else if (e.getSlot() > 27 && e.getSlot() < 35) {
+							mostrarCrafteosProfesiones(p, "Granjero", fullClickedItem.getItemMeta().getDisplayName());
+						}
+						//TABERNERO
+						else if (e.getSlot() > 36 && e.getSlot() < 44) {
+							mostrarCrafteosProfesiones(p, "Tabernero", fullClickedItem.getItemMeta().getDisplayName());
+						}
+						//ALQUIMISTA
+						else if (e.getSlot() > 45 && e.getSlot() < 53) {
+							mostrarCrafteosProfesiones(p, "Alquimista", fullClickedItem.getItemMeta().getDisplayName());
+						}
+					}
+					
+				} else if (inv.getTitle().equalsIgnoreCase("Información profesiones")) {
+					ItemStack fullClickedItem = e.getCurrentItem();
+					
+					e.setCancelled(true);
+					
+					String[] splitter = e.getInventory().getItem(0).getItemMeta().getDisplayName().split(" ");
+					
+					String profesion = splitter[0];
+					int nivelProfesion = Integer.valueOf(splitter[2]);
+					
+					if (fullClickedItem.hasItemMeta()) {
+						if (fullClickedItem.getItemMeta().getDisplayName().equals("§fObjetos desbloqueados")) {
+							mostrarObjProfesiones(p, profesion, nivelProfesion, "Objetos");
+							
+						} else if (fullClickedItem.getItemMeta().getDisplayName().equals("§fMecánicas desbloqueadas")) {
+							mostrarObjProfesiones(p, profesion, nivelProfesion, "Mecanicas");
+							
+						} else if (fullClickedItem.getItemMeta().getDisplayName().contains("Volver atras")) {
 							mostrarProfesiones(p);
 							
-						} catch(Exception ex) {
-							ex.printStackTrace();
+						}
+					}
+				} else if (inv.getTitle().equalsIgnoreCase("Desbloqueables")) {
+					e.setCancelled(true);
+					if (e.getCurrentItem() != null) {
+						ItemStack fullClickedItem = e.getCurrentItem();
+						
+						if (fullClickedItem.hasItemMeta()) {
+							if (fullClickedItem.getItemMeta().getDisplayName().contains("Volver atras")) {
+								mostrarProfesiones(p);		
+							}
 						}
 					}
 				}
-				
 			}
 		}
 	}
 	
+	//Método para crear facilmente items en una interfaz.
 	public static void createDisplay(Material material, Inventory inv, int Slot, String name, String[] lore) {
 		ItemStack item = new ItemStack(material);
 		ItemMeta meta = item.getItemMeta();

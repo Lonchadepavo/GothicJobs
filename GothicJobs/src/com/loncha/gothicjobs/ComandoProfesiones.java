@@ -25,7 +25,7 @@ public class ComandoProfesiones implements CommandExecutor, Plugin  {
 		this.ifaceProfesiones = ifaceProfesiones;
 	}
 	
-
+	//Comando para mostrar la interfaz de profesiones
 	@Override
 	public boolean onCommand(CommandSender arg0, Command arg1, String arg2, String[] arg3) {
 		Player p = (Player) arg0;
