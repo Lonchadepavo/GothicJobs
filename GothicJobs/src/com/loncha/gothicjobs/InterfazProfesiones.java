@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -50,7 +51,6 @@ public class InterfazProfesiones implements Listener {
 		for (int i = 0; i < profesionesLockeadas.length; i++) {
 			if (profesionesLockeadas[i]) {
 				nombreProfesiones[i] = "§c"+nombreProfesiones[i];
-				System.out.println(nombreProfesiones[i]);
 			} else {
 				nombreProfesiones[i] = "§f"+nombreProfesiones[i];
 			}
@@ -170,9 +170,9 @@ public class InterfazProfesiones implements Listener {
 	public void onInventoryClick(InventoryClickEvent e) {
 		Player p = (Player) e.getWhoClicked();
 		
-		Inventory inv = e.getInventory();
-		if (e.getClick().isLeftClick()) {
-			if (e.getCurrentItem() != null) {		
+		Inventory inv = e.getClickedInventory();
+		if (e.getCurrentItem() != null) {
+			if (inv.getType() != InventoryType.PLAYER) {
 				if (inv.getTitle().equalsIgnoreCase("Profesiones")) {
 					e.setCancelled(true);
 					Material clickedItem = e.getCurrentItem().getType();
@@ -185,7 +185,6 @@ public class InterfazProfesiones implements Listener {
 							profesionesLockeadas[i] = !profesionesLockeadas[i];
 							
 							m.profesionesLockeadas.put(p, profesionesLockeadas);
-							System.out.println("La profesión: " + nombreProfesiones[i] + " está en modo: " + profesionesLockeadas[i]);
 		
 							try {
 								m.actualizarDatos(p);

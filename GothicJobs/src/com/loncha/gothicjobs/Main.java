@@ -63,6 +63,7 @@ public class Main extends JavaPlugin implements Listener{
 		
 		getCommand("profesiones").setExecutor(new ComandoProfesiones(ifaceProfesiones));
 		getCommand("levearprofesiones").setExecutor(new LevearProfesiones(profesiones));
+		getCommand("subirpuntos").setExecutor(new SubirPuntos(profesiones, this));
 		getCommand("reloadjobs").setExecutor(new Reload(this, profesiones));
 		
 		File dataFolder = new File("plugins/GothicJobs/playerdata");

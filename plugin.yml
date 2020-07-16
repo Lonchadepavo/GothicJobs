@@ -8,6 +8,9 @@ commands:
    levearprofesiones:
       description: test.
       usage: /levearprofesiones
+   subirpuntos:
+      description: test.
+      usage: /subirpuntos <nombrejugador>
    reloadjobs:
       description: Recarga el archivo de configuracion de las profesiones;
       usage: /reloadjobs

@@ -249,6 +249,88 @@ public class Profesiones implements Listener, Plugin{
 								}
 							}
 						}
+					} else if (e.getCursor() != null && e.getCursor().getType() != Material.AIR && !e.getCursor().hasItemMeta()){
+						if (e.getCurrentItem().hasItemMeta()) {
+							if (e.getCurrentItem().getItemMeta().getDisplayName().equals(e.getCursor().getType().toString())) {
+								if (e.getCursor().getAmount() < e.getCurrentItem().getMaxStackSize()) {
+									if (s.contains(",")) {
+										String[] palabra = s.split(",");
+				
+										if (palabra.length < 3) {
+											if (palabra[0].equalsIgnoreCase(nombreItem)) {
+												if (palabra[1].equalsIgnoreCase(nombreItemInHand)) {
+													subirNivelProfesion(p, i, k, 0);
+													break;
+													
+												} else if (isNumeric(palabra[1])){
+													double puntosCrafteo = Double.parseDouble(palabra[1]);
+													subirNivelProfesion(p, i, k, puntosCrafteo);
+													break;
+													
+												} else {
+													e.setCancelled(true);
+												}
+											}
+										} else {
+											if (palabra[0].equalsIgnoreCase(nombreItem)) {
+												if (palabra[1].equalsIgnoreCase(nombreItemInHand)) {
+													if (isNumeric(palabra[2])) {
+														double puntosCrafteo = Double.parseDouble(palabra[2]);
+														subirNivelProfesion(p, i, k, puntosCrafteo);
+														break;
+													}
+												}
+											}
+										}
+									} else {
+										if (s.equals(nombreItem)) {
+											subirNivelProfesion(p, i, k, 0);
+											break;
+										}
+									}
+								}
+							}
+						} else {
+							if (e.getCurrentItem().getType() == e.getCursor().getType()) {
+								if (e.getCursor().getAmount() < e.getCurrentItem().getMaxStackSize()) {
+									if (s.contains(",")) {
+										String[] palabra = s.split(",");
+				
+										if (palabra.length < 3) {
+											if (palabra[0].equalsIgnoreCase(nombreItem)) {
+												if (palabra[1].equalsIgnoreCase(nombreItemInHand)) {
+													subirNivelProfesion(p, i, k, 0);
+													break;
+													
+												} else if (isNumeric(palabra[1])){
+													double puntosCrafteo = Double.parseDouble(palabra[1]);
+													subirNivelProfesion(p, i, k, puntosCrafteo);
+													break;
+													
+												} else {
+													e.setCancelled(true);
+												}
+											}
+										} else {
+											if (palabra[0].equalsIgnoreCase(nombreItem)) {
+												if (palabra[1].equalsIgnoreCase(nombreItemInHand)) {
+													if (isNumeric(palabra[2])) {
+														double puntosCrafteo = Double.parseDouble(palabra[2]);
+														subirNivelProfesion(p, i, k, puntosCrafteo);
+														break;
+													}
+												}
+											}
+										}
+									} else {
+										if (s.equals(nombreItem)) {
+											subirNivelProfesion(p, i, k, 0);
+											break;
+										}
+									}
+								}
+							}
+						}
 					} else {
 						if (s.contains(",")) {
 							String[] palabra = s.split(",");
@@ -546,11 +628,9 @@ public class Profesiones implements Listener, Plugin{
 								String[] palabra = s.split(",");
 								//Si el bloque tiene el metadato guardado en la lista
 								if (b.hasMetadata(palabra[0])) {
-									System.out.println("profesion1");
 									b.removeMetadata(palabra[0], m);
 									
 									if (palabra.length < 3) {
-										System.out.println("2");
 										if (isNumeric(palabra[1])) {
 											Double puntosCrafteo = Double.parseDouble(palabra[1]);
 											subirNivelProfesion(p, i, k, puntosCrafteo);
@@ -565,11 +645,8 @@ public class Profesiones implements Listener, Plugin{
 											}
 										}
 									} else {
-										System.out.println("3");
 										if (palabra[1].equalsIgnoreCase(nombreItemInHand)) {
-											System.out.println("herramienta");
 											if (isNumeric(palabra[2])) {
-												System.out.println("puntos");
 												double puntosCrafteo = Double.parseDouble(palabra[2]);
 												subirNivelProfesion(p, i, k, puntosCrafteo);
 												break;
